@@ -1,7 +1,156 @@
 import 'mocha';
 import { expect } from 'chai';
 
-import { Stash, Money } from '../src/stash';
+import { Stash } from '../src/stash';
+import { Currency, Denomination, Money } from '../src/currency';
+
+describe('Platinum Currency', () => {
+  it('should translate to copper exactly', () => {
+    const currency = new Currency(1, Denomination.Platinum);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 0,
+      silver: 0,
+      copper: 1000
+    };
+
+    const result = currency.convert(Denomination.Copper);
+    expect(result).to.eql(expectedResult);
+  });
+
+  it('should translate to silver exactly', () => {
+    const currency = new Currency(1, Denomination.Platinum);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 0,
+      silver: 100,
+      copper: 0
+    };
+
+    const result = currency.convert(Denomination.Silver);
+    expect(result).to.eql(expectedResult);
+  });
+
+  it('should translate to gold exactly', () => {
+    const currency = new Currency(1, Denomination.Platinum);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 10,
+      silver: 0,
+      copper: 0
+    };
+
+    const result = currency.convert(Denomination.Gold);
+    expect(result).to.eql(expectedResult);
+  });
+
+  it('should translate to platinum exactly', () => {
+    const currency = new Currency(1, Denomination.Platinum);
+
+    const expectedResult = {
+      platinum: 1,
+      gold: 0,
+      silver: 0,
+      copper: 0
+    };
+
+    const result = currency.convert(Denomination.Platinum);
+    expect(result).to.eql(expectedResult);
+  });
+});
+
+describe('Gold Currency', () => {
+  it('should translate to copper exactly', () => {
+    const currency = new Currency(1, Denomination.Gold);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 0,
+      silver: 0,
+      copper: 100
+    };
+
+    const result = currency.convert(Denomination.Copper);
+    expect(result).to.eql(expectedResult);
+  });
+
+  it('should translate to silver exactly', () => {
+    const currency = new Currency(1, Denomination.Gold);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 0,
+      silver: 10,
+      copper: 0
+    };
+
+    const result = currency.convert(Denomination.Silver);
+    expect(result).to.eql(expectedResult);
+  });
+
+  it('should translate to gold exactly', () => {
+    const currency = new Currency(1, Denomination.Gold);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 1,
+      silver: 0,
+      copper: 0
+    };
+
+    const result = currency.convert(Denomination.Gold);
+    expect(result).to.eql(expectedResult);
+  });
+});
+
+describe('Silver Currency', () => {
+  it('should translate to copper exactly', () => {
+    const currency = new Currency(1, Denomination.Silver);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 0,
+      silver: 0,
+      copper: 10
+    };
+
+    const result = currency.convert(Denomination.Copper);
+    expect(result).to.eql(expectedResult);
+  });
+
+  it('should translate to silver exactly', () => {
+    const currency = new Currency(1, Denomination.Silver);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 0,
+      silver: 1,
+      copper: 0
+    };
+
+    const result = currency.convert(Denomination.Silver);
+    expect(result).to.eql(expectedResult);
+  });
+});
+
+describe('Copper Currency', () => {
+  it('should translate to copper exactly', () => {
+    const currency = new Currency(1, Denomination.Copper);
+
+    const expectedResult = {
+      platinum: 0,
+      gold: 0,
+      silver: 0,
+      copper: 1
+    };
+
+    const result = currency.convert(Denomination.Copper);
+    expect(result).to.eql(expectedResult);
+  });
+});
 
 describe('Stash', () => {
   it('should deposit correctly', () => {
@@ -13,10 +162,10 @@ describe('Stash', () => {
     };
 
     const deposit: Money = {
-      platinum: 12,
-      gold: 53,
-      silver: 392,
-      copper: 2914
+      platinum: 10,
+      gold: 10,
+      silver: 10,
+      copper: 10
     };
 
     const stash = new Stash(initialBalance);

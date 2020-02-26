@@ -1,93 +1,88 @@
-import { Platinum, Gold, Silver, Copper } from './currency';
-
-export interface Money {
-  platinum: number;
-  gold: number;
-  silver: number;
-  copper: number;
-}
+import { Money, Denomination, Currency } from './currency';
 
 export class Stash {
-  platinum: Platinum = new Platinum();
-  gold: Gold = new Gold();
-  silver: Silver = new Silver();
-  copper: Copper = new Copper();
+  platinum: Currency;
+  gold: Currency;
+  silver: Currency;
+  copper: Currency;
 
   constructor({ platinum, gold, silver, copper }: Money) {
-    this.platinum = new Platinum(platinum);
-    this.gold = new Gold(gold);
-    this.silver = new Silver(silver);
-    this.copper = new Copper(copper);
+    this.platinum = new Currency(Denomination.Platinum, platinum);
+    this.gold = new Currency(Denomination.Gold, gold);
+    this.silver = new Currency(Denomination.Silver, silver);
+    this.copper = new Currency(Denomination.Copper, copper);
+
+    console.log('Initial Balance: ', this.balance);
   }
 
   get balance(): Money {
     return {
-      platinum: this.platinum.count,
-      gold: this.gold.count,
-      silver: this.silver.count,
-      copper: this.copper.count
+      platinum: this.platinum.onHand,
+      gold: this.gold.onHand,
+      silver: this.silver.onHand,
+      copper: this.copper.onHand
     };
   }
 
   get totalCopperWorth(): number {
-    return this.platinum.copperWorth + this.gold.copperWorth + this.silver.copperWorth + this.copper.copperWorth;
+    return this.platinum.value + this.gold.value + this.silver.value + this.copper.value;
   }
 
   deposit({ platinum, gold, silver, copper }: Money) {
-    this.platinum.count += platinum;
-    this.gold.count += gold;
-    this.silver.count += silver;
-    this.copper.count += copper;
+    this.platinum.onHand += platinum;
+    this.gold.onHand += gold;
+    this.silver.onHand += silver;
+    this.copper.onHand += copper;
   }
 
   withdrawal({ platinum, gold, silver, copper }: Money) {
-    const p: Platinum = new Platinum(platinum);
-    const g: Gold = new Gold(gold);
-    const s: Silver = new Silver(silver);
-    const c: Copper = new Copper(copper);
+    const p: Currency = new Currency(Denomination.Platinum, platinum);
+    const g: Currency = new Currency(Denomination.Gold, gold);
+    const s: Currency = new Currency(Denomination.Silver, silver);
+    const c: Currency = new Currency(Denomination.Copper, copper);
 
-    let withdrawalWorth = p.copperWorth + g.copperWorth + s.copperWorth + c.copperWorth;
+    let withdrawalWorth = p.value + g.value + s.value + c.value;
 
     if (this.totalCopperWorth < withdrawalWorth) {
       throw new Error('Insufficient funds');
     }
 
-    if (withdrawalWorth <= this.copper.copperWorth) {
-      this.copper.count -= withdrawalWorth;
+    if (withdrawalWorth <= this.copper.value) {
+      this.copper.onHand -= withdrawalWorth;
     } else {
-      withdrawalWorth = withdrawalWorth - this.copper.copperWorth;
+      withdrawalWorth = withdrawalWorth - this.copper.value;
 
       // can our silver coins cover the remaining?
-      if (withdrawalWorth <= this.silver.copperWorth) {
-        let leftoverSilverCopper = this.silver.copperWorth - withdrawalWorth;
+      if (withdrawalWorth <= this.silver.value) {
+        let leftoverSilverCopper = this.silver.value - withdrawalWorth;
 
-        this.silver.count = Math.floor(leftoverSilverCopper / 10);
-        this.copper.count = leftoverSilverCopper % 10;
+        this.silver.onHand = Math.floor(leftoverSilverCopper / 10);
+        this.copper.onHand = leftoverSilverCopper % 10;
       } else {
-        withdrawalWorth = withdrawalWorth - this.silver.copperWorth;
+        withdrawalWorth = withdrawalWorth - this.silver.value;
 
-        if (withdrawalWorth <= this.gold.copperWorth) {
-          let leftoverGoldCopper = this.gold.copperWorth - withdrawalWorth;
+        if (withdrawalWorth <= this.gold.value) {
+          let leftoverGoldCopper = this.gold.value - withdrawalWorth;
 
-          this.gold.count = Math.floor(leftoverGoldCopper / 100);
+          this.gold.onHand = Math.floor(leftoverGoldCopper / 100);
           leftoverGoldCopper = leftoverGoldCopper % 100;
-          this.silver.count = Math.floor(leftoverGoldCopper / 10);
-          this.copper.count = leftoverGoldCopper % 10;
+          this.silver.onHand = Math.floor(leftoverGoldCopper / 10);
+          this.copper.onHand = leftoverGoldCopper % 10;
         } else {
-          withdrawalWorth = withdrawalWorth - this.gold.copperWorth;
+          withdrawalWorth = withdrawalWorth - this.gold.value;
 
-          if (withdrawalWorth <= this.platinum.copperWorth) {
-            let leftoverPlatinumCopper = this.platinum.copperWorth - withdrawalWorth;
+          if (withdrawalWorth <= this.platinum.value) {
+            let leftoverPlatinumCopper = this.platinum.value - withdrawalWorth;
 
-            this.platinum.count = Math.floor(leftoverPlatinumCopper / 1000);
+            this.platinum.onHand = Math.floor(leftoverPlatinumCopper / 1000);
 
             leftoverPlatinumCopper = leftoverPlatinumCopper % 1000;
 
-            this.gold.count = Math.floor(leftoverPlatinumCopper / 100);
+            this.gold.onHand = Math.floor(leftoverPlatinumCopper / 100);
             leftoverPlatinumCopper = leftoverPlatinumCopper % 100;
 
-            this.silver.count = Math.floor(leftoverPlatinumCopper / 10);
-            this.copper.count = leftoverPlatinumCopper % 10;
+            this.silver.onHand = Math.floor(leftoverPlatinumCopper / 10);
+            this.copper.onHand = leftoverPlatinumCopper % 10;
           }
         }
       }
