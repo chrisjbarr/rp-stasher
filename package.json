@@ -1,0 +1,33 @@
+{
+  "name": "rp-stasher",
+  "version": "1.0.0",
+  "description": "A banking application for role playing games.",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/chai": "^4.2.9",
+    "@types/mocha": "^7.0.1",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-config-typescript": "^3.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "mocha": "^7.0.1",
+    "prettier": "^1.19.1",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.2"
+  },
+  "scripts": {
+    "build": "tsc --skipLibCheck",
+    "lint": "eslint \"*/**/*.ts\"",
+    "test": "mocha -r ts-node/register tests/**/*.spec.ts"
+  },
+  "keywords": [],
+  "author": "Chris Barr cb.freelance@gmail.com",
+  "license": "MIT",
+  "files": [
+    "lib/**/*"
+  ]
+}
