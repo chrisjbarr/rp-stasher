@@ -1,288 +1,241 @@
 import 'mocha';
 import { expect } from 'chai';
 
-import { Stash } from '../src/stash';
-import { Currency, Denomination, Money } from '../src/currency';
-
-describe('Platinum Currency', () => {
-  it('should translate to copper exactly', () => {
-    const currency = new Currency(1, Denomination.Platinum);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 0,
-      silver: 0,
-      copper: 1000
-    };
-
-    const result = currency.convert(Denomination.Copper);
-    expect(result).to.eql(expectedResult);
-  });
-
-  it('should translate to silver exactly', () => {
-    const currency = new Currency(1, Denomination.Platinum);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 0,
-      silver: 100,
-      copper: 0
-    };
-
-    const result = currency.convert(Denomination.Silver);
-    expect(result).to.eql(expectedResult);
-  });
-
-  it('should translate to gold exactly', () => {
-    const currency = new Currency(1, Denomination.Platinum);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 10,
-      silver: 0,
-      copper: 0
-    };
-
-    const result = currency.convert(Denomination.Gold);
-    expect(result).to.eql(expectedResult);
-  });
-
-  it('should translate to platinum exactly', () => {
-    const currency = new Currency(1, Denomination.Platinum);
-
-    const expectedResult = {
-      platinum: 1,
-      gold: 0,
-      silver: 0,
-      copper: 0
-    };
-
-    const result = currency.convert(Denomination.Platinum);
-    expect(result).to.eql(expectedResult);
-  });
-});
-
-describe('Gold Currency', () => {
-  it('should translate to copper exactly', () => {
-    const currency = new Currency(1, Denomination.Gold);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 0,
-      silver: 0,
-      copper: 100
-    };
-
-    const result = currency.convert(Denomination.Copper);
-    expect(result).to.eql(expectedResult);
-  });
-
-  it('should translate to silver exactly', () => {
-    const currency = new Currency(1, Denomination.Gold);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 0,
-      silver: 10,
-      copper: 0
-    };
-
-    const result = currency.convert(Denomination.Silver);
-    expect(result).to.eql(expectedResult);
-  });
-
-  it('should translate to gold exactly', () => {
-    const currency = new Currency(1, Denomination.Gold);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 1,
-      silver: 0,
-      copper: 0
-    };
-
-    const result = currency.convert(Denomination.Gold);
-    expect(result).to.eql(expectedResult);
-  });
-});
-
-describe('Silver Currency', () => {
-  it('should translate to copper exactly', () => {
-    const currency = new Currency(1, Denomination.Silver);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 0,
-      silver: 0,
-      copper: 10
-    };
-
-    const result = currency.convert(Denomination.Copper);
-    expect(result).to.eql(expectedResult);
-  });
-
-  it('should translate to silver exactly', () => {
-    const currency = new Currency(1, Denomination.Silver);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 0,
-      silver: 1,
-      copper: 0
-    };
-
-    const result = currency.convert(Denomination.Silver);
-    expect(result).to.eql(expectedResult);
-  });
-});
-
-describe('Copper Currency', () => {
-  it('should translate to copper exactly', () => {
-    const currency = new Currency(1, Denomination.Copper);
-
-    const expectedResult = {
-      platinum: 0,
-      gold: 0,
-      silver: 0,
-      copper: 1
-    };
-
-    const result = currency.convert(Denomination.Copper);
-    expect(result).to.eql(expectedResult);
-  });
-});
+import { Stash, NumericalMap } from '../src/stash';
+import { Currency } from '../src/currency';
 
 describe('Stash', () => {
-  it('should deposit correctly', () => {
-    const initialBalance: Money = {
-      platinum: 0,
-      gold: 0,
-      silver: 0,
-      copper: 0
+  it('should be created correctly with given parameters', () => {
+    const denominations = [
+      { name: 'test-denomination-01', value: 10 },
+      { name: 'test-denomination-02', value: 100 }
+    ];
+
+    const expectedVault = {
+      [denominations[0].name]: new Currency(denominations[0], 0),
+      [denominations[1].name]: new Currency(denominations[1], 0)
     };
 
-    const deposit: Money = {
-      platinum: 10,
-      gold: 10,
-      silver: 10,
-      copper: 10
-    };
+    const stash = new Stash(denominations);
 
-    const stash = new Stash(initialBalance);
-    stash.deposit(deposit);
-
-    expect(stash.balance).to.eql(deposit);
+    expect(stash.denominations).to.eql(denominations);
+    expect(stash.vault).to.eql(expectedVault);
   });
 
-  it('should throw an error if stash has insufficient funds to cover withdrawal', () => {
-    const shouldThrow = (): void => {
-      const initialBalance: Money = {
-        platinum: 0,
-        gold: 0,
-        silver: 0,
-        copper: 10
-      };
+  it('should throw an error when trying to get the amount of an invalid denomination', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
 
-      const withdrawal: Money = {
-        platinum: 0,
-        gold: 0,
-        silver: 0,
-        copper: 15
-      };
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
 
-      new Stash(initialBalance).withdrawal(withdrawal);
+    const stash = new Stash(denominations);
+    const fakeDenomination = 'fake-denomination';
+
+    const shouldThrow = () => {
+      stash.amountOf(fakeDenomination);
     };
 
-    expect(shouldThrow).to.throw('Insufficient funds');
+    expect(shouldThrow).to.throw(`Stash does not have a denomination definition for: ${fakeDenomination}`);
   });
 
-  it('should withdrawal copper when copper pieces cover the withdrawal amount', () => {
-    const initialBalance: Money = {
-      platinum: 0,
-      gold: 0,
-      silver: 0,
-      copper: 30
-    };
+  it('should return 0 amount for a given denomination prior to any deposits', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
 
-    const withdrawal: Money = {
-      platinum: 0,
-      gold: 0,
-      silver: 0,
-      copper: 15
-    };
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
 
-    const stash = new Stash(initialBalance);
-    stash.withdrawal(withdrawal);
+    const stash = new Stash(denominations);
+    const actualDenomination1Amount = stash.amountOf(denomination1);
+    const actualDenomination2Amount = stash.amountOf(denomination2);
 
-    expect(stash.balance.copper).to.equal(15);
+    expect(actualDenomination1Amount).to.equal(0);
+    expect(actualDenomination2Amount).to.equal(0);
   });
 
-  it('should withdrawal all copper and some silver when we need more copper than copper pieces available', () => {
-    const initialBalance: Money = {
-      platinum: 0,
-      gold: 0,
-      silver: 5,
-      copper: 30
-    };
+  it('should return the correct amount for a given denomination after a deposit', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
 
-    const withdrawal: Money = {
-      platinum: 0,
-      gold: 0,
-      silver: 0,
-      copper: 45
-    };
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
 
-    const stash = new Stash(initialBalance);
-    stash.withdrawal(withdrawal);
+    const stash = new Stash(denominations);
 
-    expect(stash.balance.silver).to.equal(3);
-    expect(stash.balance.copper).to.equal(5);
+    const depositAmount1 = 123;
+    const depositAmount2 = 3948;
+
+    stash.deposit(denomination1, depositAmount1);
+    stash.deposit(denomination2, depositAmount2);
+
+    const actualDenomination1Amount = stash.amountOf(denomination1);
+    const actualDenomination2Amount = stash.amountOf(denomination2);
+
+    expect(actualDenomination1Amount).to.equal(depositAmount1);
+    expect(actualDenomination2Amount).to.equal(depositAmount2);
   });
 
-  it('should withdrawal all copper, silver and some gold when we need more copper than copper pieces available', () => {
-    const initialBalance: Money = {
-      platinum: 0,
-      gold: 1,
-      silver: 5,
-      copper: 30
+  it('should return the correct amounts for all denominations prior to any deposits', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
+
+    const stash = new Stash(denominations);
+    const actualStashAmount = stash.amount();
+    const expectedStashAmount: NumericalMap = {
+      [denomination1]: 0,
+      [denomination2]: 0
     };
 
-    const withdrawal: Money = {
-      platinum: 0,
-      gold: 0,
-      silver: 5,
-      copper: 45
-    };
-
-    const stash = new Stash(initialBalance);
-    stash.withdrawal(withdrawal);
-
-    expect(stash.balance.gold).to.equal(0);
-    expect(stash.balance.silver).to.equal(8);
-    expect(stash.balance.copper).to.equal(5);
+    expect(actualStashAmount).to.eql(expectedStashAmount);
   });
 
-  it('should withdrawal all copper, silver, gold and some platinum when we need more copper than copper pieces available', () => {
-    const initialBalance: Money = {
-      platinum: 2,
-      gold: 2,
-      silver: 0,
-      copper: 0
+  it('should return the correct amounts for all denominations after any deposits', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
+
+    const stash = new Stash(denominations);
+
+    const depositAmount1 = 123;
+    const depositAmount2 = 3948;
+
+    stash.deposit(denomination1, depositAmount1);
+    stash.deposit(denomination2, depositAmount2);
+
+    const actualStashAmount = stash.amount();
+    const expectedStashAmount: NumericalMap = {
+      [denomination1]: depositAmount1,
+      [denomination2]: depositAmount2
     };
 
-    const withdrawal: Money = {
-      platinum: 0,
-      gold: 0,
-      silver: 20,
-      copper: 1000
+    expect(actualStashAmount).to.eql(expectedStashAmount);
+  });
+
+  it('should throw an error when trying to get the value of an invalid denomination', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
+
+    const stash = new Stash(denominations);
+    const fakeDenomination = 'fake-denomination';
+
+    const shouldThrow = () => {
+      stash.valueOf(fakeDenomination);
     };
 
-    const stash = new Stash(initialBalance);
-    stash.withdrawal(withdrawal);
+    expect(shouldThrow).to.throw(`Stash does not have a denomination definition for: ${fakeDenomination}`);
+  });
 
-    expect(stash.balance.platinum).to.equal(1);
-    expect(stash.balance.gold).to.equal(0);
-    expect(stash.balance.silver).to.equal(0);
-    expect(stash.balance.copper).to.equal(0);
+  it('should return 0 value for a given denomination prior to any deposits', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
+
+    const stash = new Stash(denominations);
+    const actualDenomination1Amount = stash.valueOf(denomination1);
+    const actualDenomination2Amount = stash.valueOf(denomination2);
+
+    expect(actualDenomination1Amount).to.equal(0);
+    expect(actualDenomination2Amount).to.equal(0);
+  });
+
+  it('should return the correct value for a given denomination after a deposit', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+    const denomination1Value = 10;
+    const denomination2Value = 100;
+
+    const denominations = [
+      { name: denomination1, value: denomination1Value },
+      { name: denomination2, value: denomination2Value }
+    ];
+
+    const stash = new Stash(denominations);
+
+    const depositAmount1 = 123;
+    const depositAmount2 = 3948;
+
+    stash.deposit(denomination1, depositAmount1);
+    stash.deposit(denomination2, depositAmount2);
+
+    const actualDenomination1Amount = stash.valueOf(denomination1);
+    const actualDenomination2Amount = stash.valueOf(denomination2);
+
+    const expectedDenomination1Amount = depositAmount1 * denomination1Value;
+    const expectedDenomination2Amount = depositAmount2 * denomination2Value;
+
+    expect(actualDenomination1Amount).to.equal(expectedDenomination1Amount);
+    expect(actualDenomination2Amount).to.equal(expectedDenomination2Amount);
+  });
+
+  it('should return the correct values for all denominations prior to any deposits', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
+
+    const stash = new Stash(denominations);
+    const actualStashAmount = stash.amount();
+    const expectedStashAmount: NumericalMap = {
+      [denomination1]: 0,
+      [denomination2]: 0
+    };
+
+    expect(actualStashAmount).to.eql(expectedStashAmount);
+  });
+
+  it('should return the correct amounts for all denominations after any deposits', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+    const denomination1Value = 10;
+    const denomination2Value = 100;
+
+    const denominations = [
+      { name: denomination1, value: denomination1Value },
+      { name: denomination2, value: denomination2Value }
+    ];
+
+    const stash = new Stash(denominations);
+
+    const depositAmount1 = 10;
+    const depositAmount2 = 10;
+
+    stash.deposit(denomination1, depositAmount1);
+    stash.deposit(denomination2, depositAmount2);
+
+    const actualStashValue = stash.value();
+    const expectedStashValue: NumericalMap = {
+      [denomination1]: depositAmount1 * denomination1Value,
+      [denomination2]: depositAmount2 * denomination2Value
+    };
+
+    expect(actualStashValue).to.eql(expectedStashValue);
   });
 });

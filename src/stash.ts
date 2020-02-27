@@ -1,91 +1,129 @@
-import { Money, Denomination, Currency } from './currency';
+import { Currency, Denomination } from './currency';
 
+/* TODO: Does something like this already exist in TS? */
+export interface NumericalMap {
+  [indexer: string]: number;
+}
+
+export interface CurrencyMap {
+  [indexer: string]: Currency;
+}
+
+/**
+ * A stash aka bank for managing currency
+ *
+ * @export
+ * @class Stash
+ */
 export class Stash {
-  platinum: Currency;
-  gold: Currency;
-  silver: Currency;
-  copper: Currency;
+  /**
+   * An array of denominations that this stash supports
+   *
+   * @type {Denomination[]}
+   * @memberof Stash
+   */
+  denominations: Denomination[];
 
-  constructor({ platinum, gold, silver, copper }: Money) {
-    this.platinum = new Currency(Denomination.Platinum, platinum);
-    this.gold = new Currency(Denomination.Gold, gold);
-    this.silver = new Currency(Denomination.Silver, silver);
-    this.copper = new Currency(Denomination.Copper, copper);
+  /**
+   * A mapping of denominations to instances of Currency that represents that denomination
+   *
+   * @type {CurrencyMap}
+   * @memberof Stash
+   */
+  vault: CurrencyMap = {};
 
-    console.log('Initial Balance: ', this.balance);
-  }
+  /**
+   * Creates an instance of Stash.
+   * @param {Denomination[]} denominations An array of denominations that this stash will support
+   * @memberof Stash
+   */
+  constructor(denominations: Denomination[]) {
+    this.denominations = denominations;
 
-  get balance(): Money {
-    return {
-      platinum: this.platinum.onHand,
-      gold: this.gold.onHand,
-      silver: this.silver.onHand,
-      copper: this.copper.onHand
-    };
-  }
-
-  get totalCopperWorth(): number {
-    return this.platinum.value + this.gold.value + this.silver.value + this.copper.value;
-  }
-
-  deposit({ platinum, gold, silver, copper }: Money) {
-    this.platinum.onHand += platinum;
-    this.gold.onHand += gold;
-    this.silver.onHand += silver;
-    this.copper.onHand += copper;
-  }
-
-  withdrawal({ platinum, gold, silver, copper }: Money) {
-    const p: Currency = new Currency(Denomination.Platinum, platinum);
-    const g: Currency = new Currency(Denomination.Gold, gold);
-    const s: Currency = new Currency(Denomination.Silver, silver);
-    const c: Currency = new Currency(Denomination.Copper, copper);
-
-    let withdrawalWorth = p.value + g.value + s.value + c.value;
-
-    if (this.totalCopperWorth < withdrawalWorth) {
-      throw new Error('Insufficient funds');
+    for (let denomination of denominations) {
+      this.vault[denomination.name] = new Currency(denomination, 0);
     }
+  }
 
-    if (withdrawalWorth <= this.copper.value) {
-      this.copper.onHand -= withdrawalWorth;
-    } else {
-      withdrawalWorth = withdrawalWorth - this.copper.value;
+  /**
+   * Gets the value of each individual denomination in the vault
+   *
+   * @returns {NumericalMap}
+   * @memberof Stash
+   */
+  value(): NumericalMap {
+    const vaultValue: NumericalMap = {};
 
-      // can our silver coins cover the remaining?
-      if (withdrawalWorth <= this.silver.value) {
-        let leftoverSilverCopper = this.silver.value - withdrawalWorth;
+    Object.keys(this.vault).forEach(key => {
+      vaultValue[key] = this.vault[key].value;
+    });
 
-        this.silver.onHand = Math.floor(leftoverSilverCopper / 10);
-        this.copper.onHand = leftoverSilverCopper % 10;
-      } else {
-        withdrawalWorth = withdrawalWorth - this.silver.value;
+    return vaultValue;
+  }
 
-        if (withdrawalWorth <= this.gold.value) {
-          let leftoverGoldCopper = this.gold.value - withdrawalWorth;
+  /**
+   * Gets the amount of each individual denomination in the vault
+   *
+   * @returns {NumericalMap}
+   * @memberof Stash
+   */
+  amount(): NumericalMap {
+    const vaultAmount: NumericalMap = {};
 
-          this.gold.onHand = Math.floor(leftoverGoldCopper / 100);
-          leftoverGoldCopper = leftoverGoldCopper % 100;
-          this.silver.onHand = Math.floor(leftoverGoldCopper / 10);
-          this.copper.onHand = leftoverGoldCopper % 10;
-        } else {
-          withdrawalWorth = withdrawalWorth - this.gold.value;
+    Object.keys(this.vault).forEach(key => {
+      vaultAmount[key] = this.vault[key].amount;
+    });
 
-          if (withdrawalWorth <= this.platinum.value) {
-            let leftoverPlatinumCopper = this.platinum.value - withdrawalWorth;
+    return vaultAmount;
+  }
 
-            this.platinum.onHand = Math.floor(leftoverPlatinumCopper / 1000);
+  /**
+   * Gets the value of the specified denomination
+   *
+   * @param {string} denomination The denomination of the currency to get the value of
+   * @returns {number}
+   * @memberof Stash
+   */
+  valueOf(denomination: string): number {
+    this.ensureDenominationSupported(denomination);
 
-            leftoverPlatinumCopper = leftoverPlatinumCopper % 1000;
+    return this.vault[denomination].value;
+  }
 
-            this.gold.onHand = Math.floor(leftoverPlatinumCopper / 100);
-            leftoverPlatinumCopper = leftoverPlatinumCopper % 100;
+  /**
+   * Gets the amount of the specified denomination
+   *
+   * @param {string} denomination The denomination of the currency to get the amount of
+   * @returns {number}
+   * @memberof Stash
+   */
+  amountOf(denomination: string): number {
+    this.ensureDenominationSupported(denomination);
 
-            this.silver.onHand = Math.floor(leftoverPlatinumCopper / 10);
-            this.copper.onHand = leftoverPlatinumCopper % 10;
-          }
-        }
-      }
+    return this.vault[denomination].amount;
+  }
+
+  /**
+   * Deposits the denomination in the amount specified
+   *
+   * @param {string} denomination The denomination of the currency to be deposited
+   * @param {number} amount The amount (not the value) of currency to be deposit
+   * @memberof Stash
+   */
+  deposit(denomination: string, amount: number): void {
+    this.vault[denomination].amount += amount;
+  }
+
+  /**
+   * Ensures that the vault has the specified denomination, raises an error if not.
+   *
+   * @private
+   * @param {string} denomination The denomination to ensure exists in the vault
+   * @memberof Stash
+   */
+  private ensureDenominationSupported(denomination: string): void {
+    if (!Object.prototype.hasOwnProperty.call(this.vault, denomination)) {
+      throw new Error(`Stash does not have a denomination definition for: ${denomination}`);
     }
   }
 }
