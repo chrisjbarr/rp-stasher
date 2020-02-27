@@ -6,9 +6,9 @@ import { Currency, Denomination } from '../src/currency';
 describe('Currency', () => {
   it('should be created correctly with given values', () => {
     const onHand = 10;
-    const denomination: Denomination = { name: 'test-denomination', value: 100 };
+    const denomination: Denomination = { name: 'test-denomination', multiplier: 100 };
 
-    const expectedValue = onHand * denomination.value;
+    const expectedValue = onHand * denomination.multiplier;
 
     const currency = new Currency(denomination, onHand);
 

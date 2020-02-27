@@ -1,18 +1,18 @@
 export const AvailableDenominations = {
   platinum: {
     name: 'Platinum',
-    value: 1000
+    multiplier: 1000
   },
   gold: {
     name: 'Gold',
-    value: 100
+    multiplier: 100
   },
   silver: {
     name: 'Silver',
-    value: 10
+    multiplier: 10
   },
   copper: {
     name: 'Copper',
-    value: 1
+    multiplier: 1
   }
 };

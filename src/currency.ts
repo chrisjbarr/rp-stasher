@@ -1,6 +1,6 @@
 export interface Denomination {
   name: string;
-  value: number;
+  multiplier: number;
 }
 
 export class Currency {
@@ -13,6 +13,6 @@ export class Currency {
   }
 
   get value(): number {
-    return this.amount * this.denomination.value;
+    return this.amount * this.denomination.multiplier;
   }
 }

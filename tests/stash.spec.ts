@@ -7,8 +7,8 @@ import { Currency } from '../src/currency';
 describe('Stash', () => {
   it('should be created correctly with given parameters', () => {
     const denominations = [
-      { name: 'test-denomination-01', value: 10 },
-      { name: 'test-denomination-02', value: 100 }
+      { name: 'test-denomination-01', multiplier: 10 },
+      { name: 'test-denomination-02', multiplier: 100 }
     ];
 
     const expectedVault: CurrencyMap = {
@@ -32,8 +32,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -51,8 +51,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -68,8 +68,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -92,8 +92,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -111,8 +111,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -137,8 +137,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -156,8 +156,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -175,8 +175,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -194,8 +194,8 @@ describe('Stash', () => {
     const denomination2Value = 100;
 
     const denominations = [
-      { name: denomination1, value: denomination1Value },
-      { name: denomination2, value: denomination2Value }
+      { name: denomination1, multiplier: denomination1Value },
+      { name: denomination2, multiplier: denomination2Value }
     ];
 
     const stash = new Stash(denominations);
@@ -221,8 +221,8 @@ describe('Stash', () => {
     const denomination2 = 'test-denomination-02';
 
     const denominations = [
-      { name: denomination1, value: 10 },
-      { name: denomination2, value: 100 }
+      { name: denomination1, multiplier: 10 },
+      { name: denomination2, multiplier: 100 }
     ];
 
     const stash = new Stash(denominations);
@@ -242,8 +242,8 @@ describe('Stash', () => {
     const denomination2Value = 100;
 
     const denominations = [
-      { name: denomination1, value: denomination1Value },
-      { name: denomination2, value: denomination2Value }
+      { name: denomination1, multiplier: denomination1Value },
+      { name: denomination2, multiplier: denomination2Value }
     ];
 
     const stash = new Stash(denominations);
@@ -270,8 +270,8 @@ describe('Stash', () => {
     const denomination2Value = 100;
 
     const denominations = [
-      { name: denomination1, value: denomination1Value },
-      { name: denomination2, value: denomination2Value }
+      { name: denomination1, multiplier: denomination1Value },
+      { name: denomination2, multiplier: denomination2Value }
     ];
 
     const stash = new Stash(denominations);
@@ -309,8 +309,8 @@ describe('Stash', () => {
     const denomination2Amount = 310;
 
     const denominations = [
-      { name: denomination1, value: denomination1Value },
-      { name: denomination2, value: denomination2Value }
+      { name: denomination1, multiplier: denomination1Value },
+      { name: denomination2, multiplier: denomination2Value }
     ];
 
     const funds: CurrencyMap = {
@@ -333,8 +333,8 @@ describe('Stash', () => {
     const denomination2Value = 100;
 
     const denominations = [
-      { name: denomination1, value: denomination1Value },
-      { name: denomination2, value: denomination2Value }
+      { name: denomination1, multiplier: denomination1Value },
+      { name: denomination2, multiplier: denomination2Value }
     ];
 
     const stash = new Stash(denominations);
