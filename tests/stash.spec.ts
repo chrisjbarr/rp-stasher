@@ -146,6 +146,25 @@ describe('Stash', () => {
     expect(shouldThrow).to.throw(`Stash does not have a denomination definition for: ${fakeDenomination}`);
   });
 
+  it('should throw an error when trying to deposit to an invalid denomination', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+
+    const denominations = [
+      { name: denomination1, value: 10 },
+      { name: denomination2, value: 100 }
+    ];
+
+    const stash = new Stash(denominations);
+    const fakeDenomination = 'fake-denomination';
+
+    const shouldThrow = () => {
+      stash.deposit(fakeDenomination, 25);
+    };
+
+    expect(shouldThrow).to.throw(`Stash does not have a denomination definition for: ${fakeDenomination}`);
+  });
+
   it('should return 0 value for a given denomination prior to any deposits', () => {
     const denomination1 = 'test-denomination-01';
     const denomination2 = 'test-denomination-02';
@@ -192,7 +211,7 @@ describe('Stash', () => {
     expect(actualDenomination2Amount).to.equal(expectedDenomination2Amount);
   });
 
-  it('should return the correct values for all denominations prior to any deposits', () => {
+  it('should return the correct amounts for all denominations prior to any deposits', () => {
     const denomination1 = 'test-denomination-01';
     const denomination2 = 'test-denomination-02';
 
@@ -236,6 +255,43 @@ describe('Stash', () => {
       [denomination2]: depositAmount2 * denomination2Value
     };
 
+    expect(actualStashValue).to.eql(expectedStashValue);
+  });
+
+  it('should return the correct amounts and values for all denominations after a bulk deposit', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+    const denomination1Value = 10;
+    const denomination2Value = 100;
+
+    const denominations = [
+      { name: denomination1, value: denomination1Value },
+      { name: denomination2, value: denomination2Value }
+    ];
+
+    const stash = new Stash(denominations);
+
+    const depositAmount1 = 10;
+    const depositAmount2 = 10;
+
+    stash.depositBulk({
+      [denomination1]: depositAmount1,
+      [denomination2]: depositAmount2
+    });
+
+    const actualStashAmount = stash.amount();
+    const expectedStashAmount: NumericalMap = {
+      [denomination1]: depositAmount1,
+      [denomination2]: depositAmount2
+    };
+
+    const actualStashValue = stash.value();
+    const expectedStashValue: NumericalMap = {
+      [denomination1]: depositAmount1 * denomination1Value,
+      [denomination2]: depositAmount2 * denomination2Value
+    };
+
+    expect(actualStashAmount).to.eql(expectedStashAmount);
     expect(actualStashValue).to.eql(expectedStashValue);
   });
 });

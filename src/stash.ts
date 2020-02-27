@@ -1,6 +1,6 @@
 import { Currency, Denomination } from './currency';
 
-/* TODO: Does something like this already exist in TS? */
+/* TODO: Begin - Does something like this already exist in TS? */
 export interface NumericalMap {
   [indexer: string]: number;
 }
@@ -8,9 +8,10 @@ export interface NumericalMap {
 export interface CurrencyMap {
   [indexer: string]: Currency;
 }
+/* TODO: End - Does something like this already exist in TS? */
 
 /**
- * A stash aka bank for managing currency
+ * A stash AKA bank for managing currency
  *
  * @export
  * @class Stash
@@ -111,7 +112,21 @@ export class Stash {
    * @memberof Stash
    */
   deposit(denomination: string, amount: number): void {
+    this.ensureDenominationSupported(denomination);
+
     this.vault[denomination].amount += amount;
+  }
+
+  /**
+   * Deposits the amounts specified for the given denominations
+   *
+   * @param {NumericalMap} transaction
+   * @memberof Stash
+   */
+  depositBulk(transaction: NumericalMap): void {
+    Object.keys(transaction).forEach(key => {
+      this.deposit(key, transaction[key]);
+    });
   }
 
   /**
