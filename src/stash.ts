@@ -143,12 +143,12 @@ export class Stash {
     // translate transaction to currency
     const funds: CurrencyMap = {};
 
-    Object.keys(funds).forEach(key => {
+    Object.keys(transaction).forEach(key => {
       funds[key] = new Currency(this.denominations[key], transaction[key]);
     });
 
-    const vaultValue = this.totalValue(this.vault);
-    const fundsValue = this.totalValue(funds);
+    const vaultValue = this.calculateTotalValue(this.vault);
+    const fundsValue = this.calculateTotalValue(funds);
 
     return vaultValue >= fundsValue;
   }
@@ -160,7 +160,7 @@ export class Stash {
    * @returns {number}
    * @memberof Stash
    */
-  totalValue(funds: CurrencyMap): number {
+  calculateTotalValue(funds: CurrencyMap): number {
     return Object.keys(funds).reduce((acc, key) => {
       return acc + funds[key].value;
     }, 0);

@@ -320,9 +320,66 @@ describe('Stash', () => {
 
     const stash = new Stash(denominations);
 
-    const totalValue = stash.totalValue(funds);
+    const totalValue = stash.calculateTotalValue(funds);
     const expectedValue = denomination1Value * denomination1Amount + denomination2Value * denomination2Amount;
 
     expect(totalValue).to.equal(expectedValue);
+  });
+
+  it('should accurately determine if enough funds are available to cover a transaction', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+    const denomination1Value = 10;
+    const denomination2Value = 100;
+
+    const denominations = [
+      { name: denomination1, value: denomination1Value },
+      { name: denomination2, value: denomination2Value }
+    ];
+
+    const stash = new Stash(denominations);
+
+    const depositAmount1 = 10;
+    const depositAmount2 = 10;
+
+    stash.depositBulk({
+      [denomination1]: depositAmount1,
+      [denomination2]: depositAmount2
+    });
+
+    // total value in stash is 1100
+
+    const fundsAreAvailableCheck1: NumericalMap = {
+      [denomination1]: 100 // total value of 100x10 = 1000; (this is more than the amount we deposited for this denomination, so the stash internally will pull from other denominations)
+    };
+
+    const fundsAreAvailableCheck2: NumericalMap = {
+      [denomination2]: 5 // total value of 5x100 = 500;
+    };
+
+    const fundsAreAvailableCheck3: NumericalMap = {
+      [denomination1]: 70, // total value of 70x10 = 700;
+      [denomination2]: 3 // total value of 3x100 = 300; // Total is 1000... we good
+    };
+
+    const fundsAreNotAvailableCheck1: NumericalMap = {
+      [denomination1]: 1000 // total value of 1000x10 = 10000
+    };
+
+    const fundsAreNotAvailableCheck2: NumericalMap = {
+      [denomination1]: 22, // total value of 10x22 = 220; (this is more than the 'amount' we deposited, so the stash internally will pull from other denominations)
+      [denomination2]: 9 // total value of 90x100 = 900; (total of 1050, so we don't have enough)
+    };
+
+    const fundsAreNotAvailableCheck3: NumericalMap = {
+      [denomination2]: 13 // total value of 13x100 = 1300
+    };
+
+    expect(stash.areEnoughFundsAvailable(fundsAreAvailableCheck1)).to.eql(true);
+    expect(stash.areEnoughFundsAvailable(fundsAreAvailableCheck2)).to.eql(true);
+    expect(stash.areEnoughFundsAvailable(fundsAreAvailableCheck3)).to.eql(true);
+    expect(stash.areEnoughFundsAvailable(fundsAreNotAvailableCheck1)).to.eql(false);
+    expect(stash.areEnoughFundsAvailable(fundsAreNotAvailableCheck2)).to.eql(false);
+    expect(stash.areEnoughFundsAvailable(fundsAreNotAvailableCheck3)).to.eql(false);
   });
 });
