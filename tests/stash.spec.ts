@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect } from 'chai';
 
-import { Stash, NumericalMap } from '../src/stash';
+import { Stash, NumericalMap, CurrencyMap, DenominationMap } from '../src/stash';
 import { Currency } from '../src/currency';
 
 describe('Stash', () => {
@@ -11,14 +11,19 @@ describe('Stash', () => {
       { name: 'test-denomination-02', value: 100 }
     ];
 
-    const expectedVault = {
+    const expectedVault: CurrencyMap = {
       [denominations[0].name]: new Currency(denominations[0], 0),
       [denominations[1].name]: new Currency(denominations[1], 0)
     };
 
+    const expectedDenominations: DenominationMap = {
+      [denominations[0].name]: denominations[0],
+      [denominations[1].name]: denominations[1]
+    };
+
     const stash = new Stash(denominations);
 
-    expect(stash.denominations).to.eql(denominations);
+    expect(stash.denominations).to.eql(expectedDenominations);
     expect(stash.vault).to.eql(expectedVault);
   });
 
@@ -293,5 +298,31 @@ describe('Stash', () => {
 
     expect(actualStashAmount).to.eql(expectedStashAmount);
     expect(actualStashValue).to.eql(expectedStashValue);
+  });
+
+  it('should return the correct total value for the given funds', () => {
+    const denomination1 = 'test-denomination-01';
+    const denomination2 = 'test-denomination-02';
+    const denomination1Value = 10;
+    const denomination2Value = 100;
+    const denomination1Amount = 123;
+    const denomination2Amount = 310;
+
+    const denominations = [
+      { name: denomination1, value: denomination1Value },
+      { name: denomination2, value: denomination2Value }
+    ];
+
+    const funds: CurrencyMap = {
+      [denominations[0].name]: new Currency(denominations[0], denomination1Amount),
+      [denominations[1].name]: new Currency(denominations[1], denomination2Amount)
+    };
+
+    const stash = new Stash(denominations);
+
+    const totalValue = stash.totalValue(funds);
+    const expectedValue = denomination1Value * denomination1Amount + denomination2Value * denomination2Amount;
+
+    expect(totalValue).to.equal(expectedValue);
   });
 });

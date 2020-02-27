@@ -5,6 +5,10 @@ export interface NumericalMap {
   [indexer: string]: number;
 }
 
+export interface DenominationMap {
+  [indexer: string]: Denomination;
+}
+
 export interface CurrencyMap {
   [indexer: string]: Currency;
 }
@@ -23,7 +27,7 @@ export class Stash {
    * @type {Denomination[]}
    * @memberof Stash
    */
-  denominations: Denomination[];
+  denominations: DenominationMap = {};
 
   /**
    * A mapping of denominations to instances of Currency that represents that denomination
@@ -39,10 +43,9 @@ export class Stash {
    * @memberof Stash
    */
   constructor(denominations: Denomination[]) {
-    this.denominations = denominations;
-
     for (let denomination of denominations) {
       this.vault[denomination.name] = new Currency(denomination, 0);
+      this.denominations[denomination.name] = denomination;
     }
   }
 
@@ -127,6 +130,40 @@ export class Stash {
     Object.keys(transaction).forEach(key => {
       this.deposit(key, transaction[key]);
     });
+  }
+
+  /**
+   * Determines if there is enough funds to cover the given amount specified
+   *
+   * @param {NumericalMap} transaction The denominations and amounts looking to be covered.
+   * @returns {boolean}
+   * @memberof Stash
+   */
+  areEnoughFundsAvailable(transaction: NumericalMap): boolean {
+    // translate transaction to currency
+    const funds: CurrencyMap = {};
+
+    Object.keys(funds).forEach(key => {
+      funds[key] = new Currency(this.denominations[key], transaction[key]);
+    });
+
+    const vaultValue = this.totalValue(this.vault);
+    const fundsValue = this.totalValue(funds);
+
+    return vaultValue >= fundsValue;
+  }
+
+  /**
+   * Gets the total value of all specified funds
+   *
+   * @param {CurrencyMap} funds - The funds to calculate the total value for
+   * @returns {number}
+   * @memberof Stash
+   */
+  totalValue(funds: CurrencyMap): number {
+    return Object.keys(funds).reduce((acc, key) => {
+      return acc + funds[key].value;
+    }, 0);
   }
 
   /**
